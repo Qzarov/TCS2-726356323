@@ -1,4 +1,6 @@
-# Simple wallet project
+# Smart Challenge2
+
+[Contest's Github] https://github.com/ton-blockchain/func-contest2
 
 Deployed by [toncli](https://github.com/disintar/toncli)
 

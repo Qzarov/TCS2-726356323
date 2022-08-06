@@ -1,0 +1,62 @@
+{-
+  TASK 2 - Merge hashmaps (dictionaries)
+  Write the method that merges two hashmaps into one. 
+  
+  When keys of hashmaps interesect - values from first hashmap should be used, 
+  while discarded key/value pairs should be stored into separate hashmap.
+
+  Method should return two hashmaps (merged_dict, discared_dict). 
+  
+  If any of resulting hashmaps is empty it should be represented by `null` value.
+  Hashmap key length is 256 bit. Each hashmap has at most 256 elements.
+-}
+
+() recv_internal() {
+}
+
+
+;; testable
+(cell, cell) merge_hashmaps(cell dict1, cell dict2) method_id {
+    ;; udict_set is a set-by-key function for dictionaries with unsigned integer keys
+    ;; idict_set is the corresponding function for dictionaries with signed integer keys
+    ;; dict_set is the function for dictionaries with slice keys.
+
+
+    ;;slice ds = dict1.begin_parse();
+    ;;cell merged_dict = ds.slice_bits() == 0 ? new_dict() : dict1;
+
+    cell discared_dict = new_dict();
+
+    int key = -1;
+    do {
+        (key, slice value, int flag) = dict2.udict_get_next?(256, key);
+        if (flag) {
+            (dict1, int is_in_dict) = udict_add?(dict1, 256, key, value);
+            if (is_in_dict == 0) {
+                discared_dict~udict_set(256, key, value);
+            }
+        }
+    } until ( ~ flag);
+
+    if (dict1.dict_empty?()) {
+        dict1 = new_dict();
+    }
+
+    return (dict1, discared_dict);
+}
+
+{-
+
+(int) dict_contains_key?(int key, cell dict) 
+{
+        int k = -1;
+        do {
+            (k, slice value, int flag) = dict.dict_get_next?(256, k);
+            if (k == key) {
+                return 1;
+            }
+        } until ( ~ flag);
+        return 0;
+}
+
+-}
