@@ -22,9 +22,6 @@
     ;; dict_set is the function for dictionaries with slice keys.
 
 
-    ;;slice ds = dict1.begin_parse();
-    ;;cell merged_dict = ds.slice_bits() == 0 ? new_dict() : dict1;
-
     cell discared_dict = new_dict();
 
     int key = -1;
@@ -44,19 +41,3 @@
 
     return (dict1, discared_dict);
 }
-
-{-
-
-(int) dict_contains_key?(int key, cell dict) 
-{
-        int k = -1;
-        do {
-            (k, slice value, int flag) = dict.dict_get_next?(256, k);
-            if (k == key) {
-                return 1;
-            }
-        } until ( ~ flag);
-        return 0;
-}
-
--}
