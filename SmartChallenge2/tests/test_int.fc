@@ -1,0 +1,40 @@
+;; #include "../func/typehelpers.fc";
+
+forall X -> int is_int(X x) asm "<{ TRY:<{ 0 PUSHINT ADD DROP -1 PUSHINT }>CATCH<{ 2DROP 0 PUSHINT }> }>CONT 1 1 CALLXARGS";
+int tuple_length(tuple t) asm "TLEN";
+forall X -> (tuple, X) ~tpop(tuple t) asm "TPOP";
+forall X -> int force_cast_to_int(X x) asm "NOP";
+
+;; data funtion
+[int, tuple, cell, tuple, int] test_example_data() method_id(0) 
+{
+    int function_selector = 3;
+
+    cell message = begin_cell()
+                    .store_uint(11, 32)
+                    ;;.store_uint(12, 32)
+                    .end_cell();
+    
+    tuple stack = unsafe_tuple([message.begin_parse()]); 
+
+	cell data = begin_cell()             
+		.store_uint(12, 64)              
+		.end_cell();
+
+    return [function_selector, stack, data, get_c7(), null()];
+}
+
+;; test function
+_ test_example(int exit_code, cell data, tuple stack, 
+                        cell actions, int gas) method_id(1) 
+{
+    throw_if(100, exit_code != 0); ;; 0 - complete successful
+    
+    throw_if(101, tuple_length(stack) != 1);
+
+    ;;(tuple t, var x) = ~tpop(stack);
+	;;throw_if(102, is_int(x));
+
+    ;;x = force_cast_to_int(x);
+    ;;throw_if(103, x != 11);
+}
