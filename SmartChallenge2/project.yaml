@@ -2,6 +2,6 @@ contract:
   data: fift/data.fif
   func:
     - func/typehelpers.fc
-    - func/4.fc
+    - func/5.fc
   tests:
     - tests/test_int.fc 

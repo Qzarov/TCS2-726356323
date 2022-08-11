@@ -1,11 +1,15 @@
 ;; #include "../func/typehelpers.fc";
 
 forall X -> int is_int(X x) asm "<{ TRY:<{ 0 PUSHINT ADD DROP -1 PUSHINT }>CATCH<{ 2DROP 0 PUSHINT }> }>CONT 1 1 CALLXARGS";
+forall X -> int is_cell(X x) asm "<{ TRY:<{ CTOS DROP -1 PUSHINT }>CATCH<{ 2DROP 0 PUSHINT }> }>CONT 1 1 CALLXARGS";
+
+forall X -> int force_cast_to_int(X x) asm "NOP";
+forall X -> cell force_cast_to_cell(X x) asm "NOP";
+
 int tuple_length(tuple t) asm "TLEN";
 forall X -> (tuple, X) ~tpop(tuple t) asm "TPOP";
-forall X -> int force_cast_to_int(X x) asm "NOP";
 
-;; data funtion
+;; data funtion 1
 [int, tuple, cell, tuple, int] test_example_data() method_id(0) 
 {
     int function_selector = 3;
@@ -24,17 +28,73 @@ forall X -> int force_cast_to_int(X x) asm "NOP";
     return [function_selector, stack, data, get_c7(), null()];
 }
 
-;; test function
-_ test_example(int exit_code, cell data, tuple stack, 
-                        cell actions, int gas) method_id(1) 
+;; test function 1
+_ test_example(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(1) 
 {
     throw_if(100, exit_code != 0); ;; 0 - complete successful
     
     throw_if(101, tuple_length(stack) != 1);
 
-    ;;(tuple t, var x) = ~tpop(stack);
-	;;throw_if(102, is_int(x));
+    (tuple t, var x) = ~tpop(stack);
+	throw_if(102, is_int(x));
 
-    ;;x = force_cast_to_int(x);
-    ;;throw_if(103, x != 11);
+    x = force_cast_to_int(x);
+    throw_if(103, x != 11);
+}
+
+
+;; data funtion 2
+[int, tuple, cell, tuple, int] test_serialization_data() method_id(2) 
+{
+    int function_selector = 117735;
+
+    cell message = begin_cell()
+                    .store_uint(11, 256)
+                    .store_uint(12, 256)
+                    .end_cell();
+    
+    tuple stack = unsafe_tuple([message]); 
+
+	cell data = begin_cell()             
+		.store_uint(9, 64)   
+        .store_uint(10, 64)                     
+		.end_cell();
+
+    return [function_selector, stack, data, get_c7(), null()];
+}
+
+;; test function 2
+_ test_serialization(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(3) 
+{
+    throw_if(100, exit_code != 0);
+    int t_l = tuple_length(stack);
+
+    dump_stack();
+
+    throw_if(101, t_l != 1);
+
+    ;; parse cell
+    (tuple stack, cell c) = ~tpop(stack);
+    throw_if(102, ~ is_cell(c));
+    throw_if(103, cell_null?(c));
+
+    slice s = begin_parse(c);
+
+    int n_refs = slice_refs(s);
+    throw_if(104, n_refs != 0);
+
+    int length = slice_bits(s);
+    throw_if(105, length != 0);
+
+    int num = s~load_int(8); ;; exit-code 9, Cell underflow. Read from slice primitive 
+    ;;throw_if(106, num != 2);  ;; tried to read more bits or references than there are.
+
+    ;;int i1 = s~load_int(256);
+    ;;throw_if(107, i1 != 3);
+
+    ;;int i2 = s~load_int(256);
+    ;;throw_if(108, i2 != 4);
+
+    ;;(tuple stack, int i) = ~tpop(stack);
+    ;;throw_if(103, i != 12);
 }

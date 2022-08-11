@@ -52,7 +52,8 @@ builder serialize_element(builder b, var x) method_id
 
     b = b.store_uint(4,3).store_uint(tuple_length(t_x), 8);
     while (tuple_length(t_x) > 0) {
-      b = serialize_element(b, t_x~list_next());
+      (t_x, var el) = ~tpop(t_x);
+      b = serialize_element(b, el);
     }  
   }
   return b;
@@ -61,12 +62,21 @@ builder serialize_element(builder b, var x) method_id
 ;; testable
 (cell) serialize(tuple values) method_id
 {
+  int length = tuple_length(values);
   builder srl = begin_cell();
-  srl.store_uint(tuple_length(values), 8);
+  
+  ;;srl.store_uint(length, 8);
+  ;;srl.store_int(first(values), 256);
+  ;;srl.store_int(second(values), 256);
 
-  while (tuple_length(values) > 0) {
-    srl = serialize_element(srl, values~list_next());
-  }
+  srl.store_uint(2, 8);
+  srl.store_int(3, 256);
+  srl.store_int(4, 256);
+
+  ;;while (tuple_length(values) > 0) {
+  ;;  (values, var x) = ~tpop(values);
+  ;;  srl = serialize_element(srl, x);
+  ;;}
 
   return srl.end_cell();
 }
@@ -91,7 +101,8 @@ builder serialize_element(builder b, var x) method_id
 
     int t_size = s~load_uint(8);
     repeat(t_size) {
-      (s, t) = deserialize_element_to_tuple(s, t~list_next());
+      (t, var x) = ~tpop(t);
+      (s, t) = deserialize_element_to_tuple(s, x);
     }  
   }
   return (s,t);
@@ -113,8 +124,8 @@ builder serialize_element(builder b, var x) method_id
 
 (tuple) ser_deser(tuple t) method_id (3)
 {
-  return t;
-  ;;return deserialize(serialize(t));
+  ;;return t;
+  return deserialize(serialize(t));
 }
 
 

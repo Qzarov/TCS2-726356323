@@ -27,7 +27,7 @@
 
 ;; testable
 (int, tuple) validate_message(cell message) method_id {
-
+    slice s = message.begin_parse();
 
     return (-1, unsafe_tuple([null(), null(), 0]));
 }
